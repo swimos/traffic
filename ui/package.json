@@ -10,6 +10,10 @@
   "private": true,
   "main": "dist/main/swim-traffic.js",
   "devDependencies": {
+    "@swim/core": "3.9.0",
+    "@swim/client": "3.9.0",
+    "@swim/ui": "3.9.0",
+    "@swim/ux": "3.9.0",
     "@types/mapbox-gl": "0.51",
     "rollup": "1.2",
     "rollup-plugin-node-resolve": "4",

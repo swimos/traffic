@@ -1,0 +1,134 @@
+import java.util.regex.Matcher
+
+buildscript {
+  repositories {
+    maven { url 'https://plugins.gradle.org/m2/' }
+  }
+  dependencies {
+    classpath 'com.netflix.nebula:gradle-ospackage-plugin:6.1.1'
+  }
+}
+
+apply plugin: 'java'
+apply plugin: 'java-library'
+apply plugin: 'application'
+apply plugin: 'nebula.ospackage-application'
+
+group = 'ai.swim'
+description = 'Real-time Traffic App'
+sourceCompatibility = 1.9
+version = project.property('application.version')
+ext.moduleName = 'swim.traffic'
+mainClassName = 'swim.traffic.TrafficPlane'
+
+repositories {
+  jcenter()
+}
+
+dependencies {
+  compile 'ai.swim:swim-loader:3.9.0'
+  compile 'ai.swim:swim-server:3.9.0'
+}
+
+afterEvaluate {
+  compileJava {
+    if (useModules) {
+      doFirst {
+        options.compilerArgs += [
+          '--module-path', classpath.asPath,
+        ]
+        classpath = files()
+      }
+    }
+    options.compilerArgs += ['-Xlint']
+    options.encoding = 'UTF-8'
+  }
+
+  jar {
+    inputs.property('moduleName', moduleName)
+    manifest {
+      attributes(
+        'Implementation-Title': moduleName,
+        'Implementation-Version': version,
+        'Main-Class': mainClassName)
+    }
+  }
+
+  tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+    if (!useModules) {
+      exclude '*module-info*'
+    }
+  }
+
+  run {
+    dependsOn jar
+    doFirst {
+      jvmArgs += [
+        '--module-path', files(configurations.runtimeClasspath, jar.archivePath).asPath,
+        '--module', "${moduleName}/${mainClassName}"
+      ]
+      classpath = files()
+    }
+  }
+
+  startScripts {
+    inputs.property("moduleName", moduleName)
+    doFirst {
+      classpath = files()
+      defaultJvmOpts = [
+        '-Dswim.config=/etc/swim-traffic/server.recon',
+        '-Xms4g',
+        '-Xmx4g',
+        '--module-path', 'APP_HOME_LIBS',
+        '--module', "${moduleName}/${mainClassName}"
+      ]
+    }
+    doLast {
+      def bashFile = new File(outputDir, applicationName)
+      String bashContent = bashFile.text
+      bashFile.text = bashContent.replaceFirst('APP_HOME_LIBS', Matcher.quoteReplacement('$APP_HOME/lib'))
+
+      def batFile = new File(outputDir, applicationName + ".bat")
+      String batContent = batFile.text
+      batFile.text = batContent.replaceFirst('APP_HOME_LIBS', Matcher.quoteReplacement('%APP_HOME%\\lib'))
+    }
+  }
+
+  ospackage {
+    release '1'
+    prefix '/opt/swim-traffic'
+  }
+
+  task packageDeb(type: Deb) {
+    maintainer = 'chris@swim.ai'
+
+    configurationFile("/etc/sysconfig/${project.name}")
+    preInstall "addgroup --quiet --system ${project.name}"
+    preInstall "adduser --quiet --system --ingroup ${project.name} --no-create-home --disabled-password ${project.name}"
+    postInstall "systemctl preset ${project.name} > /dev/null 2>&1"
+    postInstall "systemctl start ${project.name} > /dev/null 2>&1"
+    preUninstall  "systemctl disable ${project.name} > /dev/null 2>&1"
+    preUninstall  "systemctl stop ${project.name} > /dev/null 2>&1"
+    postUninstall "systemctl daemon-reload > /dev/null 2>&1"
+
+    from('pkg') {
+      into '/etc/systemd/system'
+      include '*.service'
+      addParentDirs false
+      expand project.properties
+      user 'root'
+      permissionGroup 'root'
+      fileMode = 0644
+    }
+
+    from('pkg') {
+      into '/etc/sysconfig'
+      include "${project.name}"
+      user 'root'
+      permissionGroup 'root'
+      fileMode = 0644
+      fileType CONFIG | NOREPLACE
+    }
+  }
+}

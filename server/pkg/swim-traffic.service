@@ -1,0 +1,13 @@
+[Unit]
+Description=Swim Traffic
+Wants=network.target
+
+[Service]
+EnvironmentFile=-/etc/sysconfig/swim-traffic
+ExecStart=/opt/swim-traffic/bin/swim-traffic
+User=swim-traffic
+Restart=on-failure
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target

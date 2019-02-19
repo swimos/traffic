@@ -15,8 +15,6 @@
 import {NodeRef} from "@swim/client";
 import {Color} from "@swim/color";
 import {Transition} from "@swim/transition";
-import {HtmlView} from "@swim/view";
-import {TextRunView} from "@swim/typeset";
 import {MapGraphicView} from "@swim/map";
 import {IntersectionMapView} from "../map/IntersectionMapView";
 import {TrafficKpiViewController} from "./TrafficKpiViewController";
@@ -37,13 +35,6 @@ export class PedestrianBackupKpiViewController extends TrafficKpiViewController 
     return Color.parse("#c200fa");
   }
 
-  didSetView(view: HtmlView): void {
-    super.didSetView(view);
-
-    this.kpiTitleView.text("Palo Alto — Pedestrian Backup");
-    this.kpiSubtitleView.text("@ Crosswalks");
-  }
-
   updateKpi(): void {
     let meterValue = 0;
     let spaceValue = 0;
@@ -60,17 +51,18 @@ export class PedestrianBackupKpiViewController extends TrafficKpiViewController 
       }
     }
 
-    const pieTitle = this.pieTitleView;
-    const pieMeter = this.pieMeterView;
-    const pieMeterLegend = pieMeter.legend()! as TextRunView;
-    const pieEmpty = this.pieEmptyView;
-    const pieEmptyLegend = pieEmpty.legend()! as TextRunView;
+    const title = this.titleView;
+    const meter = this.meterView;
+    const empty = this.emptyView;
     const tween = Transition.duration<any>(1000);
 
-    pieMeter.value(meterValue, tween);
-    pieEmpty.value(spaceValue, tween);
-    pieMeterLegend.text("Waiting (" + meterValue + ")");
-    pieEmptyLegend.text("Clear (" + spaceValue + ")");
-    pieTitle.text(Math.round(100 * meterValue / ((meterValue + spaceValue) || 1)) + "%");
+    this.title!.text('Palo Alto - PEDESTRIAN BACKUP');
+    this.subtitle!.text('@ CROSSWALKS');
+
+    meter.value(meterValue, tween);
+    empty.value(spaceValue, tween);
+    this.meterLegend!.text("Waiting (" + meterValue + ")");
+    this.clearLegend!.text("Clear (" + spaceValue + ")");
+    title.text(Math.round(100 * meterValue / ((meterValue + spaceValue) || 1)) + "%");
   }
 }

@@ -23,6 +23,18 @@ export abstract class TrafficKpiViewController extends HtmlViewController {
   /** @hidden */
   _updateTimer: number;
 
+  /** @hidden */
+  _title?: HtmlView;
+
+  /** @hidden */
+  _subtitle?: HtmlView;
+
+  /** @hidden */
+  _meterLegend?: TextRunView;
+
+  /** @hidden */
+  _clearLegend?: TextRunView;
+
   constructor() {
     super();
     this._updateTimer = 0;
@@ -32,35 +44,35 @@ export abstract class TrafficKpiViewController extends HtmlViewController {
 
   abstract updateKpi(): void;
 
-  get headerView(): HtmlView {
-    return this._view!.getChildView("header")! as HtmlView;
+  get title(): HtmlView | undefined {
+    return this._title;
   }
 
-  get headerLeftView(): HtmlView {
-    return this.headerView.getChildView("left")! as HtmlView;
+  get subtitle(): HtmlView | undefined {
+    return this._subtitle;
   }
 
-  get kpiTitleView(): HtmlView {
-    return this.headerLeftView.getChildView("title")! as HtmlView;
+  get meterLegend(): TextRunView | undefined {
+    return this._meterLegend;
   }
 
-  get kpiSubtitleView(): HtmlView {
-    return this.headerLeftView.getChildView("subtitle")! as HtmlView;
+  get clearLegend(): TextRunView | undefined {
+    return this._clearLegend;
   }
 
   get pieView(): PieView {
     return this._view!.getChildView("body")!.getChildView("canvas")!.getChildView("pie")! as PieView;
   }
 
-  get pieTitleView(): TextRunView {
+  get titleView(): TextRunView {
     return this.pieView.title()! as TextRunView;
   }
 
-  get pieMeterView(): SliceView {
+  get meterView(): SliceView {
     return this.pieView.getChildView("meter")! as SliceView;
   }
 
-  get pieEmptyView(): SliceView {
+  get emptyView(): SliceView {
     return this.pieView.getChildView("empty") as SliceView;
   }
 
@@ -74,15 +86,14 @@ export abstract class TrafficKpiViewController extends HtmlViewController {
         .fontSize(12);
 
     const header = view.append("div")
-        .key("header")
         .display("flex")
         .justifyContent("space-between")
         .textTransform("uppercase")
         .color(primaryColor);
 
-    const headerLeft = header.append("div").key("left");
-    headerLeft.append("span").key("title").display("block");
-    headerLeft.append("span").key("subtitle").display("block");
+    const headerLeft = header.append("div");
+    this._title = headerLeft.append("span").display("block").text("Palo Alto — Pedestrian Backup");
+    this._subtitle = headerLeft.append("span").display("block").text("@ Crosswalks");
 
     const headerRight = header.append("div");
     headerRight.append("span").text("Real-Time");
@@ -97,7 +108,7 @@ export abstract class TrafficKpiViewController extends HtmlViewController {
         .arrangement("manual")
         .innerRadius(Length.pct(34))
         .outerRadius(Length.pct(37))
-        .dialColor(primaryColor.alpha(0.25))
+        .dialColor(primaryColor.alpha(0.25));
     gauge.append(innerDial);
 
     const outerDial = new DialView()
@@ -117,28 +128,28 @@ export abstract class TrafficKpiViewController extends HtmlViewController {
         .textColor(primaryColor);
     bodyCanvas.append(pie);
 
-    const pieTitle = new TextRunView()
+    const title = new TextRunView()
         .font("36px \"Open Sans\", sans-serif")
         .textColor(primaryColor);
-    pie.title(pieTitle);
+    pie.title(title);
 
-    const pieMeter = new SliceView()
+    const meter = new SliceView()
         .key("meter")
         .sliceColor(primaryColor)
         .tickColor(primaryColor);
-    pie.append(pieMeter);
+    pie.append(meter);
 
-    const pieMeterLegend = new TextRunView("Waiting").textColor(primaryColor);
-    pieMeter.legend(pieMeterLegend);
+    this._meterLegend = new TextRunView("Waiting").textColor(primaryColor);
+    meter.legend(this._meterLegend);
 
-    const pieEmpty = new SliceView()
+    const empty = new SliceView()
         .key("empty")
         .sliceColor(Color.transparent())
-        .tickColor(primaryColor.darker(1.5));
-    pie.append(pieEmpty);
+        .tickColor(primaryColor.darker(3));
+    pie.append(empty);
 
-    const pieEmptyLegend = new TextRunView("Clear").textColor(primaryColor.darker(1.5));
-    pieEmpty.legend(pieEmptyLegend);
+    this._clearLegend = new TextRunView("Clear").textColor(primaryColor.darker(3));
+    empty.legend(this._clearLegend);
   }
 
   viewDidMount(view: HtmlView): void {

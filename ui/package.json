@@ -24,6 +24,7 @@
   },
   "scripts": {
     "compile": "tsc -b",
-    "bundle": "rollup -c"
+    "bundle": "rollup -c",
+    "all": "npm run compile && npm run bundle"
   }
 }

@@ -15,7 +15,8 @@
 import {Value} from "@swim/structure";
 import {MapDownlink, NodeRef, ValueDownlink} from "@swim/client";
 import {Color} from "@swim/color";
-import {PopoverView, PopoverViewController, HtmlView} from "@swim/view";
+import {HtmlView, PopoverView, PopoverViewController} from "@swim/view";
+// import {Transition} from '@swim/transition';
 import {ApproachInfo} from "./ApproachModel";
 
 export class ApproachPopoverViewController extends PopoverViewController {
@@ -23,6 +24,9 @@ export class ApproachPopoverViewController extends PopoverViewController {
   _info: ApproachInfo;
   /** @hidden */
   _nodeRef: NodeRef;
+
+  /** @hidden */
+  _linkphases?: MapDownlink<Value, Value>;
 
   /** @hidden */
   _linkLatency?: ValueDownlink<Value>;
@@ -47,6 +51,12 @@ export class ApproachPopoverViewController extends PopoverViewController {
 
   /** @hidden */
   _greenView?: HtmlView;
+
+  /** @hidden */
+  _curPhases: number = 0;
+
+  /** @hidden */
+  _countDown?: any;
 
   constructor(info: ApproachInfo, nodeRef: NodeRef) {
     super();
@@ -130,10 +140,10 @@ export class ApproachPopoverViewController extends PopoverViewController {
       .justifyContent('center')
       .alignItems('center')
       .margin(5)
-      .opacity(0.5)
       .borderRadius(boxSide/2)
       .fontSize(boxFontSize)
-      .text('0')
+      .opacity(0.2)
+      .text('')
       .backgroundColor('#a50f21');
 
     this._yellowView = content.append('div')
@@ -141,11 +151,11 @@ export class ApproachPopoverViewController extends PopoverViewController {
       .height(boxSide)
       .display('flex')
       .justifyContent('center')
-      .alignContent('center')
+      .alignItems('center')
       .margin(5)
-      .opacity(0.5)
       .borderRadius(boxSide/2)
       .fontSize(boxFontSize)
+      .opacity(0.2)
       .text('')
       .backgroundColor('#fccf20');
 
@@ -154,29 +164,53 @@ export class ApproachPopoverViewController extends PopoverViewController {
       .height(boxSide)
       .display('flex')
       .justifyContent('center')
-      .alignContent('center')
+      .alignItems('center')
       .margin(5)
-      .opacity(0.5)
       .borderRadius(boxSide/2)
       .fontSize(boxFontSize)
+      .opacity(0.2)
       .text('')
       .backgroundColor('#54e218');
 
-    const footer = view.append('footer')
-      .textAlign('right');
-    footer.append('span').text('test');
+    // const footer = view.append('footer')
+    //   .textAlign('right');
+    // footer.append('span').text('test');
   }
 
   popoverDidShow(view: any): void {
+    this.linkphases();
     this.linkLatency();
     this.linkMode();
     this.linkPhaseEvent();
   }
 
   popoverDidHide(view: any): void {
+    this.unlinkphases();
     this.unlinkLatency();
     this.unlinkMode();
     this.unlinkPhaseEvent();
+  }
+
+  didUpdatephases(k: Value, v: Value) {
+    if(k.numberValue() === this._info.phase) {
+      this._curPhases = v.numberValue() as number;
+    }
+  }
+
+  protected linkphases() {
+    if(!this._linkphases) {
+      this._linkphases = this._nodeRef.downlinkMap()
+        .laneUri("phase/state")
+        .didUpdate(this.didUpdatephases.bind(this))
+        .open();
+    }
+  }
+
+  protected unlinkphases() {
+    if (this._linkphases) {
+      this._linkphases.close();
+      this._linkphases = undefined;
+    }
   }
 
   didUpdateLatency(v: Value) {
@@ -222,15 +256,43 @@ export class ApproachPopoverViewController extends PopoverViewController {
     }
   }
 
+  changeLight(nextPhase: number) {
+    let element: HtmlView | null = null;
+
+    // Reset
+    this._redView!.opacity(0.2).text('');
+    this._yellowView!.opacity(0.2).text('');
+    this._greenView!.opacity(0.2).text('');
+
+    // Current Light
+    switch( this._curPhases ) {
+      case 1:
+        element = this._redView!;
+        break;
+      case 2:
+        element = this._yellowView!;
+        break;
+      case 3:
+        element = this._greenView!;
+        break;
+    }
+
+    this._countDown = setInterval(() => {
+      const now = new Date();
+      const phaseDate = new Date(nextPhase);
+      const countdown = Math.round( Math.abs( (phaseDate.getTime() - now.getTime()) / 1000 ) );
+      element!.opacity(1).text(`${ countdown }`);
+    }, 900);
+
+  }
+
   didUpdatePhaseEvent(k: Value, v: Value) {
-    // const phase = this._info.phase;
-    const nextPhase = v.get('st').numberValue();
-    const clk = v.get('clk').numberValue() || 0;
-    // const countdown = Math.min( clk, 0 )
-    console.log('nextPhase: ', nextPhase, ' clk: ', clk);
-    console.log('k: ', k, ' v: ', v);
-    console.log('info: ', this._info);
-    // todo
+    if(this._info.phase === k.numberValue() ) {
+      const nextPhase = v.get('clk').numberValue() as number;
+      clearInterval(this._countDown);
+      this._countDown = undefined;
+      this.changeLight(nextPhase);
+    }
   }
 
   protected linkPhaseEvent() {

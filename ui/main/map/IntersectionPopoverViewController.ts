@@ -217,12 +217,13 @@ export class IntersectionPopoverViewController extends PopoverViewController {
         .textColor("#4a4a4a");
       canvas.append(chart);
 
+      const futureColor = Color.rgb('#6c6c6c').alpha(0.2);
       const plot0 = new AreaGraphView()
-        .fill("#ffffff");
+        .fill(futureColor);
       chart.addPlot(plot0);
 
       const plot1 = new LineGraphView()
-        .stroke("#767676")
+        .stroke(futureColor)
         .strokeWidth(1);
       chart.addPlot(plot1);
 

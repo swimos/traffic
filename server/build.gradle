@@ -21,6 +21,10 @@ version = project.property('application.version')
 ext.moduleName = 'swim.traffic'
 mainClassName = 'swim.traffic.TrafficPlane'
 
+// Build with `gradle -Pno-modules` to force compatibility with legacy JVMs.
+def jvmVersion = System.getProperty('java.version').split('\\.')[0] as Integer
+def useModules = jvmVersion >= 9 && !project.hasProperty('no-modules')
+
 repositories {
   jcenter()
 }

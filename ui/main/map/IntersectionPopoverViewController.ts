@@ -16,7 +16,7 @@ import {Value} from "@swim/structure";
 import {MapDownlink, NodeRef, ValueDownlink} from "@swim/client";
 import {Color} from "@swim/color";
 import {HtmlView, PopoverView, PopoverViewController} from "@swim/view";
-import {ChartView, LineGraphView} from "@swim/chart";
+import {AreaGraphView, ChartView, LineGraphView} from "@swim/chart";
 import {IntersectionInfo} from "./IntersectionModel";
 
 export class IntersectionPopoverViewController extends PopoverViewController {
@@ -46,10 +46,18 @@ export class IntersectionPopoverViewController extends PopoverViewController {
   /** @hidden */
   _modeView?: HtmlView;
 
+  /** @hidden */
+  _contentView?: HtmlView;
+
+  /** @hidden */
+  _chartChildView: { [key: number]: any };
+
   constructor(info: IntersectionInfo, nodeRef: NodeRef) {
     super();
     this._info = info;
     this._nodeRef = nodeRef;
+
+    this._chartChildView = {};
   }
 
   didSetView(view: PopoverView): void {
@@ -111,37 +119,11 @@ export class IntersectionPopoverViewController extends PopoverViewController {
       .text('--');
     this._modeView.setStyle('list-style', 'none');
 
-    const content = view.append('div')
+    this._contentView = view.append('div')
       .display('flex')
       .flexDirection('column')
       .flexGrow(1)
       .overflow('auto');
-
-    content.append('h3')
-      .fontWeight('normal')
-      .text('Phase');
-    const canvas = content.append('div')
-      .height(60)
-      .append('canvas');
-    const chart = new ChartView()
-      .bottomAxis("linear")
-      .leftAxis("linear")
-      .bottomGesture(true)
-      .leftDomainPadding([0.1, 0.1])
-      .topGutter(0)
-      .rightGutter(0)
-      .bottomGutter(20)
-      .leftGutter(-1)
-      .domainColor("#4a4a4a")
-      .tickMarkColor("#4a4a4a")
-      .font("12px sans-serif")
-      .textColor("#4a4a4a");
-    canvas.append(chart);
-
-    const plot = new LineGraphView()
-      .stroke("#4a4a4a")
-      .strokeWidth(2);
-    chart.addPlot(plot);
 
     // const footer = view.append('footer')
     //   .textAlign('right');
@@ -152,11 +134,17 @@ export class IntersectionPopoverViewController extends PopoverViewController {
   popoverDidShow(view: any): void {
     this.linkLatency();
     this.linkMode();
+    this.linkPhase();
+    this.linkHistory();
+    this.linkFuture();
   }
 
   popoverDidHide(view: any): void {
     this.unlinkLatency();
     this.unlinkMode();
+    this.unlinkPhase();
+    this.unlinkHistory();
+    this.unlinkFuture();
   }
 
   didUpdateLatency(v: Value) {
@@ -202,8 +190,54 @@ export class IntersectionPopoverViewController extends PopoverViewController {
     }
   }
 
-  didUpdatePhase(key: Value, value: Value) {
-    // for each phase have a chart and grab out of history and futrue map lane
+  didUpdatePhase(k: Value, v: Value) {
+    const key = k.numberValue() as number;
+    if(!this._chartChildView[key]) {
+      this._contentView!.append('h3')
+        .fontWeight('normal')
+        .text(`Phase ${key}`);
+
+      const canvas=  this._contentView!.append('div')
+        .height(50)
+        .append('canvas')
+        .position('relative');
+
+      const chart = new ChartView()
+        .bottomAxis("time")
+        .leftAxis("linear")
+        .bottomGesture(true)
+        .leftDomainPadding([0.1, 0.1])
+        .topGutter(0)
+        .rightGutter(0)
+        .bottomGutter(20)
+        .leftGutter(-1)
+        .domainColor("#4a4a4a")
+        .tickMarkColor("#4a4a4a")
+        .font("12px sans-serif")
+        .textColor("#4a4a4a");
+      canvas.append(chart);
+
+      const plot0 = new AreaGraphView()
+        .fill("#ffffff");
+      chart.addPlot(plot0);
+
+      const plot1 = new LineGraphView()
+        .stroke("#767676")
+        .strokeWidth(1);
+      chart.addPlot(plot1);
+
+      const plot2 = new LineGraphView()
+        .stroke("#00a6ed")
+        .strokeWidth(1);
+      chart.addPlot(plot2);
+
+      this._chartChildView[key] = {
+        chartVew: chart,
+        plot0View: plot0,
+        plot1View: plot1,
+        plot2View: plot2,
+      };
+    }
   }
 
   protected linkPhase() {
@@ -222,8 +256,17 @@ export class IntersectionPopoverViewController extends PopoverViewController {
     }
   }
 
-  didUpdateHistory(key: Value, value: Value) {
-    // for each phase have a chart and grab out of history and futrue map lane
+  didUpdateHistory(k: Value, v: Value) {
+    for(const id in this._chartChildView) {
+      const phaseSample = v.get('signalPhases').get(+id).get('red').numberValue() || 0;
+      this._chartChildView[id].plot2View.insertDatum({x: k.numberValue(), y: phaseSample});
+    }
+  }
+
+  didRemoveHistory(k: Value, v: Value) {
+    for(const id in this._chartChildView) {
+      this._chartChildView[id].plot2View.removeDatum( k.numberValue() );
+    }
   }
 
   protected linkHistory() {
@@ -231,6 +274,7 @@ export class IntersectionPopoverViewController extends PopoverViewController {
       this._linkHistory = this._nodeRef.downlinkMap()
         .laneUri("intersection/history")
         .didUpdate(this.didUpdateHistory.bind(this))
+        .didRemove(this.didRemoveHistory.bind(this))
         .open();
     }
   }
@@ -242,8 +286,21 @@ export class IntersectionPopoverViewController extends PopoverViewController {
     }
   }
 
-  didUpdateFuture(key: Value, value: Value) {
-    // for each phase have a chart and grab out of history and futrue map lane
+  didUpdateFuture(k: Value, v: Value) {
+    for(const id in this._chartChildView) {
+      const prediction = v.get('signalPhases').get(+id).get('red').numberValue() || 0;
+      const clamped = Math.round(prediction);
+
+      this._chartChildView[id].plot0View.insertDatum({x: k.numberValue(), y: prediction, dy: clamped});
+      this._chartChildView[id].plot1View.insertDatum({x: k.numberValue(), y: prediction});
+    }
+  }
+
+  didRemoveFuture(k: Value, v: Value) {
+    for(const id in this._chartChildView) {
+      this._chartChildView[id].plot0View.removeDatum( k.numberValue() );
+      this._chartChildView[id].plot1View.removeDatum( k.numberValue() );
+    }
   }
 
   protected linkFuture() {
@@ -251,6 +308,7 @@ export class IntersectionPopoverViewController extends PopoverViewController {
       this._linkFuture = this._nodeRef.downlinkMap()
         .laneUri("intersection/future")
         .didUpdate(this.didUpdateFuture.bind(this))
+        .didRemove(this.didRemoveFuture.bind(this))
         .open();
     }
   }

@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Value} from "@swim/structure";
-import {NodeRef, ValueDownlink} from "@swim/client";
+import {MapDownlink, NodeRef, ValueDownlink} from "@swim/client";
 import {Color} from "@swim/color";
 import {PopoverView, PopoverViewController, HtmlView} from "@swim/view";
 import {ApproachInfo} from "./ApproachModel";
@@ -31,10 +31,22 @@ export class ApproachPopoverViewController extends PopoverViewController {
   _linkMode?: ValueDownlink<Value>;
 
   /** @hidden */
+  _phaseEvent?: MapDownlink<Value, Value>;
+
+  /** @hidden */
   _latencyView?: HtmlView;
 
   /** @hidden */
   _modeView?: HtmlView;
+
+  /** @hidden */
+  _redView?: HtmlView;
+
+  /** @hidden */
+  _yellowView?: HtmlView;
+
+  /** @hidden */
+  _greenView?: HtmlView;
 
   constructor(info: ApproachInfo, nodeRef: NodeRef) {
     super();
@@ -111,7 +123,7 @@ export class ApproachPopoverViewController extends PopoverViewController {
 
     const boxSide = 80;
     const boxFontSize = 23;
-    const red = content.append('div')
+    this._redView = content.append('div')
       .width(boxSide)
       .height(boxSide)
       .display('flex')
@@ -124,7 +136,7 @@ export class ApproachPopoverViewController extends PopoverViewController {
       .text('0')
       .backgroundColor('#a50f21');
 
-    const yellow = content.append('div')
+    this._yellowView = content.append('div')
       .width(boxSide)
       .height(boxSide)
       .display('flex')
@@ -137,7 +149,7 @@ export class ApproachPopoverViewController extends PopoverViewController {
       .text('')
       .backgroundColor('#fccf20');
 
-    const green = content.append('div')
+    this._greenView = content.append('div')
       .width(boxSide)
       .height(boxSide)
       .display('flex')
@@ -150,8 +162,6 @@ export class ApproachPopoverViewController extends PopoverViewController {
       .text('')
       .backgroundColor('#54e218');
 
-    console.log('red: ', red, ' yellow: ', yellow, ' green ', green );
-
     const footer = view.append('footer')
       .textAlign('right');
     footer.append('span').text('test');
@@ -159,10 +169,14 @@ export class ApproachPopoverViewController extends PopoverViewController {
 
   popoverDidShow(view: any): void {
     this.linkLatency();
+    this.linkMode();
+    this.linkPhaseEvent();
   }
 
   popoverDidHide(view: any): void {
     this.unlinkLatency();
+    this.unlinkMode();
+    this.unlinkPhaseEvent();
   }
 
   didUpdateLatency(v: Value) {
@@ -205,6 +219,33 @@ export class ApproachPopoverViewController extends PopoverViewController {
     if (this._linkMode) {
       this._linkMode.close();
       this._linkMode = undefined;
+    }
+  }
+
+  didUpdatePhaseEvent(k: Value, v: Value) {
+    // const phase = this._info.phase;
+    const nextPhase = v.get('st').numberValue();
+    const clk = v.get('clk').numberValue() || 0;
+    // const countdown = Math.min( clk, 0 )
+    console.log('nextPhase: ', nextPhase, ' clk: ', clk);
+    console.log('k: ', k, ' v: ', v);
+    console.log('info: ', this._info);
+    // todo
+  }
+
+  protected linkPhaseEvent() {
+    if(!this._phaseEvent) {
+      this._phaseEvent = this._nodeRef.downlinkMap()
+        .laneUri("phase/event")
+        .didUpdate(this.didUpdatePhaseEvent.bind(this))
+        .open();
+    }
+  }
+
+  protected unlinkPhaseEvent() {
+    if (this._phaseEvent) {
+      this._phaseEvent.close();
+      this._phaseEvent = undefined;
     }
   }
 

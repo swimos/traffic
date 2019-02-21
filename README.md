@@ -8,6 +8,9 @@ See [Traffic in action](http://www.swim.ai/showcase/traffic).
   * Ensure that your `JAVA_HOME` environment variable is pointed to your Java installation location.
   * Ensure that your `PATH` includes `$JAVA_HOME`.
 
+* [Install Node.js](https://nodejs.org/en/).
+  * Confirm that [npm](https://www.npmjs.com/get-npm) was installed during the Node.js installation.
+
 ## Run
 
 ### Windows

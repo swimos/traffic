@@ -30,8 +30,8 @@ repositories {
 }
 
 dependencies {
-  compile 'ai.swim:swim-loader:3.9.0'
-  compile 'ai.swim:swim-server:3.9.0'
+  compile 'ai.swim:swim-loader:3.9.1'
+  compile 'ai.swim:swim-server:3.9.1'
 }
 
 afterEvaluate {

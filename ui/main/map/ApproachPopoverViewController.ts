@@ -256,6 +256,14 @@ export class ApproachPopoverViewController extends PopoverViewController {
     }
   }
 
+  countDown(element: HtmlView | null, nextPhase: number) {
+    const now = new Date();
+    const phaseDate = new Date(nextPhase);
+    let countdown = Math.round( (phaseDate.getTime() - now.getTime()) / 1000 );
+    if(countdown < 0) { countdown = 0; }
+    element!.text(`${ countdown }`);
+  }
+
   changeLight(nextPhase: number) {
     let element: HtmlView | null = null;
 
@@ -276,13 +284,12 @@ export class ApproachPopoverViewController extends PopoverViewController {
         element = this._greenView!;
         break;
     }
+    element!.opacity(1);
 
+    this.countDown(element, nextPhase); // init
     this._countDown = setInterval(() => {
-      const now = new Date();
-      const phaseDate = new Date(nextPhase);
-      const countdown = Math.round( Math.abs( (phaseDate.getTime() - now.getTime()) / 1000 ) );
-      element!.opacity(1).text(`${ countdown }`);
-    }, 900);
+      this.countDown(element, nextPhase);
+    }, 100);
 
   }
 

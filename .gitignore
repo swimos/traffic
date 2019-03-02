@@ -1,8 +1,22 @@
+# Ignore IDE cache
+.vscode
+
+# Ignore mac hidden file ...
 .DS_Store
 *.DS_Store
-.idea
-.gradle
-.vscode
+
+# Font end style cache
+.sass-cache
+
+# Ignore all folders that name match list
 build
 out
 server/ui
+
+# Ignore all files that name match list
+package.lock
+yarn.lock
+
+# Ignore all extensions match the list
+.idea
+.gradle

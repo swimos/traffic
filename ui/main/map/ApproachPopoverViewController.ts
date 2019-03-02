@@ -194,6 +194,7 @@ export class ApproachPopoverViewController extends PopoverViewController {
   didUpdatephases(k: Value, v: Value) {
     if(k.numberValue() === this._info.phase) {
       this._curPhases = v.numberValue() as number;
+      this.updateLight();
     }
   }
 
@@ -256,21 +257,16 @@ export class ApproachPopoverViewController extends PopoverViewController {
     }
   }
 
-  countDown(element: HtmlView | null, nextPhase: number) {
-    const now = new Date();
-    const phaseDate = new Date(nextPhase);
+  countDown(element: HtmlView | null, nextPhase: number): void {
+    const now = new Date(); // computer time
+    const phaseDate = new Date(nextPhase); // downlink time
     let countdown = Math.round( (phaseDate.getTime() - now.getTime()) / 1000 );
     if(countdown < 0) { countdown = 0; }
     element!.text(`${ countdown }`);
   }
 
-  changeLight(nextPhase: number) {
+  updateLight(nextPhase?: number) {
     let element: HtmlView | null = null;
-
-    // Reset
-    this._redView!.opacity(0.2).text('');
-    this._yellowView!.opacity(0.2).text('');
-    this._greenView!.opacity(0.2).text('');
 
     // Current Light
     switch( this._curPhases ) {
@@ -284,20 +280,32 @@ export class ApproachPopoverViewController extends PopoverViewController {
         element = this._greenView!;
         break;
     }
+    // Reset
+    this._redView!.opacity(0.2).text('');
+    this._yellowView!.opacity(0.2).text('');
+    this._greenView!.opacity(0.2).text('');
+    clearInterval(this._countDown);
+    this._countDown = undefined;
+
     element!.opacity(1);
 
-    this.countDown(element, nextPhase); // init
-    this._countDown = setInterval(() => {
+    if(!nextPhase) {
+      element!.text('0');
+    } else {
       this.countDown(element, nextPhase);
-    }, 100);
+      this._countDown = setInterval(() => {
+        this.countDown(element, nextPhase);
+      }, 100);
+    }
+  }
 
+  changeLight(nextPhase: number) {
+    this.updateLight(nextPhase);
   }
 
   didUpdatePhaseEvent(k: Value, v: Value) {
     if(this._info.phase === k.numberValue() ) {
       const nextPhase = v.get('clk').numberValue() as number;
-      clearInterval(this._countDown);
-      this._countDown = undefined;
       this.changeLight(nextPhase);
     }
   }

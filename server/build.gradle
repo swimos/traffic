@@ -27,11 +27,14 @@ def useModules = jvmVersion >= 9 && !project.hasProperty('no-modules')
 
 repositories {
   jcenter()
+  maven {
+    url 'https://oss.sonatype.org/content/repositories/snapshots/'
+  }
 }
 
 dependencies {
-  compile 'ai.swim:swim-loader:3.9.1'
-  compile 'ai.swim:swim-server:3.9.1'
+  api group: 'ai.swim', name: 'swim-loader', version: version
+  api group: 'ai.swim', name: 'swim-server', version: version
 }
 
 afterEvaluate {

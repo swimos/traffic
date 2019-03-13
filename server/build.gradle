@@ -13,6 +13,8 @@ apply plugin: 'java'
 apply plugin: 'java-library'
 apply plugin: 'application'
 apply plugin: 'nebula.ospackage-application'
+apply plugin: 'idea'
+idea.module.outputDir file("out/production/classes")
 
 group = 'ai.swim'
 description = 'Real-time Traffic App'

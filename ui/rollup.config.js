@@ -47,7 +47,7 @@ const main = {
       "@swim/chart": "swim",
       "@swim/map": "swim",
       "@swim/mapbox": "swim",
-      "@swim/ux": "swim",
+      "@swim/ui": "swim",
 
       "mapbox-gl": "mapboxgl",
     },
@@ -93,7 +93,7 @@ const main = {
     "@swim/chart",
     "@swim/map",
     "@swim/mapbox",
-    "@swim/ux",
+    "@swim/ui",
 
     "mapbox-gl",
   ],

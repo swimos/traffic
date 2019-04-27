@@ -37,12 +37,12 @@
       "@swim/gesture": ["../../../swim-js/swim-ui-js/@swim/gesture/main"],
       "@swim/ui": ["../../../swim-js/swim-ui-js/@swim/ui/main"],
 
-      "@swim/gauge": ["../../../swim-js/swim-ux-js/@swim/gauge/main"],
-      "@swim/pie": ["../../../swim-js/swim-ux-js/@swim/pie/main"],
-      "@swim/chart": ["../../../swim-js/swim-ux-js/@swim/chart/main"],
-      "@swim/map": ["../../../swim-js/swim-ux-js/@swim/map/main"],
-      "@swim/mapbox": ["../../../swim-js/swim-ux-js/@swim/mapbox/main"],
-      "@swim/ux": ["../../../swim-js/swim-ux-js/@swim/ux/main"]
+      "@swim/gauge": ["../../../swim-js/swim-vis-js/@swim/gauge/main"],
+      "@swim/pie": ["../../../swim-js/swim-vis-js/@swim/pie/main"],
+      "@swim/chart": ["../../../swim-js/swim-vis-js/@swim/chart/main"],
+      "@swim/map": ["../../../swim-js/swim-vis-js/@swim/map/main"],
+      "@swim/mapbox": ["../../../swim-js/swim-vis-js/@swim/mapbox/main"],
+      "@swim/vis": ["../../../swim-js/swim-vis-js/@swim/vis/main"]
     }
   },
   "references": [
@@ -79,11 +79,11 @@
     {"path": "../../../../swim-js/swim-ui-js/@swim/gesture/main"},
     {"path": "../../../../swim-js/swim-ui-js/@swim/ui/main"},
 
-    {"path": "../../../../swim-js/swim-ux-js/@swim/gauge/main"},
-    {"path": "../../../../swim-js/swim-ux-js/@swim/pie/main"},
-    {"path": "../../../../swim-js/swim-ux-js/@swim/chart/main"},
-    {"path": "../../../../swim-js/swim-ux-js/@swim/map/main"},
-    {"path": "../../../../swim-js/swim-ux-js/@swim/mapbox/main"},
-    {"path": "../../../../swim-js/swim-ux-js/@swim/ux/main"}
+    {"path": "../../../../swim-js/swim-vis-js/@swim/gauge/main"},
+    {"path": "../../../../swim-js/swim-vis-js/@swim/pie/main"},
+    {"path": "../../../../swim-js/swim-vis-js/@swim/chart/main"},
+    {"path": "../../../../swim-js/swim-vis-js/@swim/map/main"},
+    {"path": "../../../../swim-js/swim-vis-js/@swim/mapbox/main"},
+    {"path": "../../../../swim-js/swim-vis-js/@swim/vis/main"}
   ]
 }

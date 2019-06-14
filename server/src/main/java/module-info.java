@@ -13,7 +13,8 @@
 // limitations under the License.
 
 open module swim.traffic {
-  requires transitive swim.loader;
+  requires transitive swim.server;
+  requires swim.loader;
 
   exports swim.traffic;
 

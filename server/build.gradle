@@ -9,34 +9,35 @@ buildscript {
   }
 }
 
-apply plugin: 'java'
 apply plugin: 'java-library'
 apply plugin: 'application'
 apply plugin: 'nebula.ospackage-application'
+
 apply plugin: 'idea'
 idea.module.outputDir file("out/production/classes")
 
 group = 'ai.swim'
 description = 'Real-time Traffic App'
-sourceCompatibility = 1.9
 version = project.property('application.version')
-ext.moduleName = 'swim.traffic'
 mainClassName = 'swim.traffic.TrafficPlane'
+ext.moduleName = 'swim.traffic'
 
 // Build with `gradle -Pno-modules` to force compatibility with legacy JVMs.
-def jvmVersion = System.getProperty('java.version').split('\\.')[0] as Integer
-def useModules = jvmVersion >= 9 && !project.hasProperty('no-modules')
+def javaVersion = System.getProperty('java.version').split('\\.')
+ext.jvmVersion = (javaVersion[0] as Integer) > 1 ? javaVersion[0] as Integer : javaVersion[1] as Integer
+ext.useModules = jvmVersion >= 9 && !hasProperty('no-modules')
+
+sourceCompatibility = JavaVersion.VERSION_1_9
+targetCompatibility = JavaVersion.VERSION_1_9
 
 repositories {
-  jcenter()
-  maven {
-    url 'https://oss.sonatype.org/content/repositories/snapshots/'
-  }
+  mavenCentral()
+  maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
 }
 
 dependencies {
-  api group: 'ai.swim', name: 'swim-loader', version: version
   api group: 'ai.swim', name: 'swim-server', version: version
+  implementation group: 'ai.swim', name: 'swim-loader', version: version
 }
 
 afterEvaluate {

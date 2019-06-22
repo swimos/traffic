@@ -15,7 +15,7 @@
     "@swim/ui": "3.9.0",
     "@swim/ux": "3.9.0",
     "@types/mapbox-gl": "0.51",
-    "rollup": "1.15",
+    "rollup": "1.16",
     "rollup-plugin-node-resolve": "5",
     "rollup-plugin-sourcemaps": "0",
     "tslib": "1",

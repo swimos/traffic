@@ -14,36 +14,34 @@
 
 package swim.traffic;
 
-import java.io.IOException;
 import swim.api.SwimAgent;
 import swim.api.SwimRoute;
-import swim.api.agent.AgentType;
+import swim.api.agent.AgentRoute;
+import swim.api.kernel.Kernel;
 import swim.api.plane.AbstractPlane;
-import swim.api.plane.PlaneContext;
-import swim.api.server.ServerContext;
-import swim.loader.ServerLoader;
+import swim.server.ServerLoader;
 import swim.structure.Value;
 import swim.traffic.agent.CityAgent;
 import swim.traffic.agent.IntersectionAgent;
 
 public class TrafficPlane extends AbstractPlane {
-  @SwimAgent(name = "city")
+  @SwimAgent("city")
   @SwimRoute("/city/:id")
-  final AgentType<?> cityAgent = agentClass(CityAgent.class);
+  AgentRoute<CityAgent> cityAgent;
 
-  @SwimAgent(name = "intersection")
+  @SwimAgent("intersection")
   @SwimRoute("/intersection/:country/:state/:city/:id")
-  final AgentType<?> intersectionAgent = agentClass(IntersectionAgent.class);
+  AgentRoute<IntersectionAgent> intersectionAgent;
 
-  public static void main(String[] args) throws IOException {
-    final ServerContext server = ServerLoader.load(TrafficPlane.class.getModule()).serverContext();
-    final PlaneContext plane = server.getPlane("traffic").planeContext();
+  public static void main(String[] args) {
+    final Kernel kernel = ServerLoader.loadServer();
+    final TrafficPlane plane = kernel.getPlane("traffic");
 
-    server.start();
+    kernel.start();
     System.out.println("Running TrafficPlane ...");
 
     plane.command("/city/PaloAlto_CA_US", "wake", Value.absent());
 
-    server.run(); // blocks until termination
+    kernel.run(); // blocks until termination
   }
 }

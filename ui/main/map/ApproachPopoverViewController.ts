@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Value} from "@swim/structure";
+import {AnyValue, Value} from "@swim/structure";
 import {MapDownlink, NodeRef, ValueDownlink} from "@swim/client";
 import {Color} from "@swim/color";
 import {HtmlView, PopoverView, PopoverViewController} from "@swim/view";
@@ -26,16 +26,16 @@ export class ApproachPopoverViewController extends PopoverViewController {
   _nodeRef: NodeRef;
 
   /** @hidden */
-  _linkphases?: MapDownlink<Value, Value>;
+  _linkphases?: MapDownlink<Value, Value, AnyValue, AnyValue>;
 
   /** @hidden */
-  _linkLatency?: ValueDownlink<Value>;
+  _linkLatency?: ValueDownlink<Value, AnyValue>;
 
   /** @hidden */
-  _linkMode?: ValueDownlink<Value>;
+  _linkMode?: ValueDownlink<Value, AnyValue>;
 
   /** @hidden */
-  _phaseEvent?: MapDownlink<Value, Value>;
+  _phaseEvent?: MapDownlink<Value, Value, AnyValue, AnyValue>;
 
   /** @hidden */
   _latencyView?: HtmlView;

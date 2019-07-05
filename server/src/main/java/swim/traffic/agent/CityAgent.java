@@ -49,7 +49,7 @@ public class CityAgent extends AbstractAgent {
   }
 
   void didUpdateRemoteIntersection(Uri intersectionUri, Value newValue, Value oldValue) {
-    //System.out.println(nodeUri().toUri() + " didUpdateRemoteIntersection: " + intersectionUri.toUri());
+    //System.out.println(nodeUri() + " didUpdateRemoteIntersection: " + intersectionUri);
     if (!intersections.containsKey(intersectionUri)) {
       intersections.downlink(intersectionUri)
           .nodeUri(intersectionUri)
@@ -67,7 +67,7 @@ public class CityAgent extends AbstractAgent {
     unlinkIntersections();
   }
 
-  static final Uri TRAFFIC_HOST = Uri.parse("swims://trafficware.swim.services?key=ab21cfe05ba-7d43-69b2-0aef-94d9d54b6f65");
+  static final Uri TRAFFIC_HOST = Uri.parse("warps://trafficware.swim.services?key=ab21cfe05ba-7d43-69b2-0aef-94d9d54b6f65");
   static final Uri INTERSECTION_INFO = Uri.parse("intersection/info");
   static final Uri NEIGHBOR_ADD = Uri.parse("neighbor/add");
   static final Uri NEIGHBOR_REMOVE = Uri.parse("neighbor/remove");

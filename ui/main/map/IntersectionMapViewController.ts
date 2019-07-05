@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Item, Value} from "@swim/structure";
+import {Item, AnyValue, Value} from "@swim/structure";
 import {MapDownlink, ValueDownlink, NodeRef} from "@swim/client";
 import {Length} from "@swim/length";
 import {Color} from "@swim/color";
@@ -34,13 +34,13 @@ export class IntersectionMapViewController extends MapGraphicViewController<Inte
   /** @hidden */
   _nodeRef: NodeRef;
   /** @hidden */
-  _schematicLink: ValueDownlink<Value> | null;
+  _schematicLink: ValueDownlink<Value, AnyValue> | null;
   /** @hidden */
-  _phasesLink: MapDownlink<Value, Value> | null;
+  _phasesLink: MapDownlink<Value, Value, AnyValue, AnyValue> | null;
   /** @hidden */
-  _detectorsLink: MapDownlink<Value, Value> | null;
+  _detectorsLink: MapDownlink<Value, Value, AnyValue, AnyValue> | null;
   /** @hidden */
-  _pedCallLink: ValueDownlink<Value> | null;
+  _pedCallLink: ValueDownlink<Value, AnyValue> | null;
   /** @hidden */
   _popoverView: PopoverView | null;
   /** @hidden */

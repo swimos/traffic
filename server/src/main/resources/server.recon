@@ -1,16 +1,18 @@
-@server {
-  @plane("traffic") {
-    class: "swim.traffic.TrafficPlane"
-  }
+@kernel(class: 'swim.store.db.DbStoreKernel', optional: true)
+@kernel(class: 'swim.reflect.ReflectKernel', optional: true)
+
+traffic: @plane {
+  class: "swim.traffic.TrafficPlane"
   @store {
     path: "/tmp/swim-traffic/"
   }
-  @http(port: 9001) {
-    plane: "traffic"
-    documentRoot: "./ui/"
-    @websocket {
-      serverCompressionLevel: 0# -1 = default; 0 = off; 1-9 = deflate level
-      clientCompressionLevel: 0# -1 = default; 0 = off; 1-9 = deflate level
-    }
+}
+
+@warp(port: 9001) {
+  plane: "traffic"
+  documentRoot: "./ui/"
+  @websocket {
+    serverCompressionLevel: 0# -1 = default; 0 = off; 1-9 = deflate level
+    clientCompressionLevel: 0# -1 = default; 0 = off; 1-9 = deflate level
   }
 }

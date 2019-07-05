@@ -21,14 +21,15 @@ description = 'Real-time Traffic App'
 version = project.property('application.version')
 mainClassName = 'swim.traffic.TrafficPlane'
 ext.moduleName = 'swim.traffic'
+ext.compilerArgs = ['-Xlint:all']
 
 // Build with `gradle -Pno-modules` to force compatibility with legacy JVMs.
 def javaVersion = System.getProperty('java.version').split('\\.')
 ext.jvmVersion = (javaVersion[0] as Integer) > 1 ? javaVersion[0] as Integer : javaVersion[1] as Integer
 ext.useModules = jvmVersion >= 9 && !hasProperty('no-modules')
 
-sourceCompatibility = JavaVersion.VERSION_1_9
-targetCompatibility = JavaVersion.VERSION_1_9
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
 
 repositories {
   mavenCentral()
@@ -36,22 +37,49 @@ repositories {
 }
 
 dependencies {
-  api group: 'ai.swim', name: 'swim-server', version: version
-  implementation group: 'ai.swim', name: 'swim-loader', version: version
+  api group: 'ai.swim', name: 'swim-api', version: version
+  implementation group: 'ai.swim', name: 'swim-server', version: version
 }
 
 afterEvaluate {
-  compileJava {
-    if (useModules) {
-      doFirst {
-        options.compilerArgs += [
-          '--module-path', classpath.asPath,
-        ]
-        classpath = files()
-      }
+  configurations {
+    apiElements {
+      sourceCompatibility = JavaVersion.VERSION_1_8
+      targetCompatibility = JavaVersion.VERSION_1_8
     }
-    options.compilerArgs += ['-Xlint']
+  }
+
+  if (useModules) {
+    task compileModuleInfoJava(type: JavaCompile) {
+      dependsOn 'compileJava'
+      doFirst {
+        options.compilerArgs = [
+          '--module-path', compileJava.classpath.asPath,
+        ]
+      }
+      options.compilerArgs += compilerArgs
+      options.encoding = 'UTF-8'
+      classpath = files()
+      source = sourceSets.main.allJava
+      sourceCompatibility = JavaVersion.VERSION_1_9
+      targetCompatibility = JavaVersion.VERSION_1_9
+      destinationDir = compileJava.destinationDir
+      include '*module-info*'
+    }
+    classes.dependsOn compileModuleInfoJava
+    def dependents = configurations.api.dependencies + configurations.implementation.dependencies
+    def dependentProjects = dependents.findAll { it instanceof ProjectDependency }
+    dependentProjects.each { dependency ->
+      compileModuleInfoJava.dependsOn ":${dependency.name}:compileModuleInfoJava"
+    }
+  }
+
+  compileJava {
+    options.compilerArgs += compilerArgs
     options.encoding = 'UTF-8'
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+    exclude '*module-info*'
   }
 
   jar {
@@ -64,11 +92,18 @@ afterEvaluate {
     }
   }
 
-  tasks.withType(JavaCompile) {
-    options.encoding = 'UTF-8'
-    if (!useModules) {
-      exclude '*module-info*'
-    }
+  task sourcesJar(type: Jar) {
+    archiveClassifier = 'sources'
+    from sourceSets.main.allSource
+  }
+
+  task javadocJar(type: Jar) {
+    archiveClassifier = 'javadoc'
+    from javadoc.destinationDir
+  }
+
+  artifacts {
+    archives javadocJar, sourcesJar
   }
 
   run {
@@ -76,7 +111,8 @@ afterEvaluate {
     doFirst {
       jvmArgs += [
         '--module-path', files(configurations.runtimeClasspath, jar.archivePath).asPath,
-        '--module', "${moduleName}/${mainClassName}"
+        '--add-modules', 'swim.store.db,swim.reflect',
+        '--module', "${moduleName}/${mainClassName}",
       ]
       classpath = files()
     }
@@ -88,7 +124,8 @@ afterEvaluate {
       classpath = files()
       defaultJvmOpts = [
         '--module-path', 'APP_HOME_LIBS',
-        '--module', "${moduleName}/${mainClassName}"
+        '--add-modules', 'swim.store.db,swim.reflect',
+        '--module', "${moduleName}/${mainClassName}",
       ]
     }
     doLast {

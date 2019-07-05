@@ -48,27 +48,27 @@ public class IntersectionAgent extends AbstractAgent {
   static final Long SAMPLE_WINDOW = 1000L;
   static final int SAMPLE_COUNT = 240; // MUST BE EVEN
 
-  @SwimLane("intersection/info")
   @SwimResident
+  @SwimLane("intersection/info")
   public ValueLane<Value> info;
 
-  @SwimLane("intersection/schematic")
   @SwimResident
+  @SwimLane("intersection/schematic")
   public ValueLane<Value> schematic;
 
-  @SwimLane("intersection/mode")
   @SwimResident
+  @SwimLane("intersection/mode")
   public ValueLane<Value> mode;
 
-  @SwimLane("intersection/latency")
   @SwimResident
+  @SwimLane("intersection/latency")
   public ValueLane<Value> latency;
 
   @SwimLane("intersection/history")
   public MapLane<Long, IntersectionTensor> intersectionHistory;
 
-  @SwimLane("phase/state")
   @SwimResident
+  @SwimLane("phase/state")
   public MapLane<Integer, Integer> signalPhaseState = this.<Integer, Integer>mapLane()
       .didUpdate(this::didUpdateSignalPhase);
 
@@ -94,24 +94,24 @@ public class IntersectionAgent extends AbstractAgent {
     }
   }
 
-  @SwimLane("phase/event")
   @SwimResident
+  @SwimLane("phase/event")
   public MapLane<Integer, SignalPhaseEvent> signalPhaseEvents;
 
-  @SwimLane("detector/state")
   @SwimResident
+  @SwimLane("detector/state")
   public MapLane<Integer, Integer> vehicleDetectorState;
 
-  @SwimLane("detector/event")
   @SwimResident
+  @SwimLane("detector/event")
   public MapLane<Integer, VehicleDetectorEvent> vehicleDetectorEvents;
 
-  @SwimLane("pedPhase/state")
   @SwimResident
+  @SwimLane("pedPhase/state")
   public MapLane<Integer, Integer> pedPhaseState;
 
-  @SwimLane("pedCall/state")
   @SwimResident
+  @SwimLane("pedCall/state")
   public MapLane<Integer, Integer> pedCallState = this.<Integer, Integer>mapLane()
       .didUpdate(this::didUpdatePedCall);
 
@@ -123,8 +123,8 @@ public class IntersectionAgent extends AbstractAgent {
     pedCall.set(st);
   }
 
-  @SwimLane("pedCall")
   @SwimResident
+  @SwimLane("pedCall")
   public ValueLane<Integer> pedCall;
 
   void sampleIntersectionTensor() {
@@ -226,13 +226,13 @@ public class IntersectionAgent extends AbstractAgent {
           .onEvent(this::didUpdateRemoteScan)
           .open()
           .didConnect(() -> {
-            System.out.println(nodeUri() + " Scan connect");
+            System.out.println(nodeUri() + " scan connect");
           })
           .didDisconnect(() -> {
-            System.out.println(nodeUri() + " Scan disconnect");
+            System.out.println(nodeUri() + " scan disconnect");
           })
           .didUnlink(() -> {
-            System.out.println(nodeUri() + " Scan unlink");
+            System.out.println(nodeUri() + " scan unlink");
           });
     }
   }
@@ -370,6 +370,6 @@ public class IntersectionAgent extends AbstractAgent {
   }
 
   static final String TRAFFIC_HOST = System.getProperty("trafficware.api.host",
-      "swims://trafficware.swim.services?key=ab21cfe05ba-7d43-69b2-0aef-94d9d54b6f65");
+      "warps://trafficware.swim.services?key=ab21cfe05ba-7d43-69b2-0aef-94d9d54b6f65");
   static final Uri TRAFFIC_HOST_URI = Uri.parse(TRAFFIC_HOST);
 }

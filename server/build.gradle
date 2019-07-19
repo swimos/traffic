@@ -28,9 +28,6 @@ def javaVersion = System.getProperty('java.version').split('\\.')
 ext.jvmVersion = (javaVersion[0] as Integer) > 1 ? javaVersion[0] as Integer : javaVersion[1] as Integer
 ext.useModules = jvmVersion >= 9 && !hasProperty('no-modules')
 
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
-
 repositories {
   mavenCentral()
   maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
@@ -108,23 +105,27 @@ afterEvaluate {
 
   run {
     dependsOn jar
-    doFirst {
-      jvmArgs += [
-        '--module-path', files(configurations.runtimeClasspath, jar.archivePath).asPath,
-        '--module', "${moduleName}/${mainClassName}",
-      ]
-      classpath = files()
+    if (useModules) {
+      doFirst {
+        jvmArgs += [
+          '--module-path', files(configurations.runtimeClasspath, jar.archivePath).asPath,
+          '--module', "${moduleName}/${mainClassName}",
+        ]
+        classpath = files()
+      }
     }
   }
 
   startScripts {
     inputs.property("moduleName", moduleName)
-    doFirst {
-      defaultJvmOpts = [
-        '--module-path', 'APP_HOME_LIBS',
-        '--module', "${moduleName}/${mainClassName}",
-      ]
-      classpath = files()
+    if (useModules) {
+      doFirst {
+        defaultJvmOpts += [
+          '--module-path', 'APP_HOME_LIBS',
+          '--module', "${moduleName}/${mainClassName}",
+        ]
+        classpath = files()
+      }
     }
     doLast {
       def bashFile = new File(outputDir, applicationName)

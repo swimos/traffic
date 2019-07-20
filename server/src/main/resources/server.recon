@@ -3,14 +3,14 @@
 
 traffic: @fabric {
   @plane(class: "swim.traffic.TrafficPlane")
-  @node {
-    pattern: "/city/:id"
-    @agent(class: "swim.traffic.agent.CityAgent")
-  }
-  @node {
-    pattern: "/intersection/:country/:state/:city/:id"
-    @agent(class: "swim.traffic.agent.IntersectionAgent")
-  }
+  #@node {
+  #  pattern: "/city/:id"
+  #  @agent(class: "swim.traffic.agent.CityAgent")
+  #}
+  #@node {
+  #  pattern: "/intersection/:country/:state/:city/:id"
+  #  @agent(class: "swim.traffic.agent.IntersectionAgent")
+  #}
   @store {
     path: "/tmp/swim-traffic/"
   }

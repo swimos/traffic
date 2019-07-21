@@ -16,9 +16,9 @@ traffic: @fabric {
   }
 }
 
-@warp(port: 9001) {
+@web(port: 9001) {
   space: "traffic"
-  documentRoot: "./ui/"
+  documentRoot: "../ui/"
   @websocket {
     serverCompressionLevel: 0# -1 = default; 0 = off; 1-9 = deflate level
     clientCompressionLevel: 0# -1 = default; 0 = off; 1-9 = deflate level

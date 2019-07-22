@@ -27,6 +27,7 @@ ext.compilerArgs = ['-Xlint:all']
 def javaVersion = System.getProperty('java.version').split('\\.')
 ext.jvmVersion = (javaVersion[0] as Integer) > 1 ? javaVersion[0] as Integer : javaVersion[1] as Integer
 ext.useModules = jvmVersion >= 9 && !hasProperty('no-modules')
+ext.moduleArgs = []
 
 repositories {
   mavenCentral()
@@ -109,6 +110,7 @@ afterEvaluate {
       doFirst {
         jvmArgs += [
           '--module-path', files(configurations.runtimeClasspath, jar.archivePath).asPath,
+        ] + moduleArgs + [
           '--module', "${moduleName}/${mainClassName}",
         ]
         classpath = files()
@@ -122,6 +124,7 @@ afterEvaluate {
       doFirst {
         defaultJvmOpts += [
           '--module-path', 'APP_HOME_LIBS',
+        ] + moduleArgs + [
           '--module', "${moduleName}/${mainClassName}",
         ]
         classpath = files()

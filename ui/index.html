@@ -22,7 +22,9 @@ mapboxgl.accessToken = "pk.eyJ1Ijoic3dpbWl0IiwiYSI6ImNqY2c3NXZkYzFoa2QycXQ1eXl1M
 
 var app = new swim.HtmlAppView(document.getElementById("app"));
 
-var trafficNodeRef = swim.nodeRef("warp://localhost:9001", "/city/PaloAlto_CA_US");
+var baseUri = swim.Uri.parse(document.location.href);
+var hostUri = baseUri.hostName() ? baseUri.base().scheme("warp") : swim.Uri.parse("warp://localhost:9001");
+var trafficNodeRef = swim.nodeRef(hostUri, "/city/PaloAlto_CA_US");
 //var trafficNodeRef = swim.nodeRef("warps://traffic.swim.services", "/city/PaloAlto_CA_US");
 var trafficViewController = new swim.traffic.TrafficViewController(trafficNodeRef);
 app.setViewController(trafficViewController);

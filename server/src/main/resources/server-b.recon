@@ -1,0 +1,47 @@
+# Server B
+
+@kernel(class: 'swim.store.db.DbStoreKernel', optional: true)
+@kernel(class: 'swim.reflect.ReflectKernel', optional: true)
+
+traffic: @fabric {
+  @plane(class: "swim.traffic.TrafficPlane")
+  @store {
+    path: "/tmp/swim-traffic-b"
+  }
+
+  @mesh {
+    @part {
+      key: partA
+      predicate: @hash(0x00000000, 0x7fffffff)
+      @host {
+        uri: "warp://localhost:9008"
+        primary: true
+      }
+      #@host {
+      #  #uri: "warp://localhost:9009"
+      #  primary: false
+      #}
+    }
+    @part {
+      key: partB
+      predicate: @hash(0x80000000, 0xffffffff)
+      #@host {
+      #  uri: "warp://localhost:9008"
+      #  primary: false
+      #}
+      @host {
+        #uri: "warp://localhost:9009"
+        primary: true
+      }
+    }
+  }
+}
+
+@web(port: 9009) {
+  space: "traffic"
+  documentRoot: "../ui/"
+  @websocket {
+    serverCompressionLevel: 0# -1 = default; 0 = off; 1-9 = deflate level
+    clientCompressionLevel: 0# -1 = default; 0 = off; 1-9 = deflate level
+  }
+}

@@ -18,7 +18,7 @@ import swim.api.SwimAgent;
 import swim.api.SwimRoute;
 import swim.api.agent.AgentRoute;
 import swim.api.plane.AbstractPlane;
-import swim.fabric.Fabric;
+import swim.api.space.Space;
 import swim.kernel.Kernel;
 import swim.server.ServerLoader;
 import swim.structure.Value;
@@ -36,12 +36,12 @@ public class TrafficPlane extends AbstractPlane {
 
   public static void main(String[] args) {
     final Kernel kernel = ServerLoader.loadServer();
-    final Fabric fabric = (Fabric) kernel.getSpace("traffic");
+    final Space space = (Space) kernel.getSpace("traffic");
 
     kernel.start();
     System.out.println("Running TrafficPlane ...");
 
-    fabric.command("/city/PaloAlto_CA_US", "wake", Value.absent());
+    space.command("/city/PaloAlto_CA_US", "wake", Value.absent());
 
     kernel.run(); // blocks until termination
   }

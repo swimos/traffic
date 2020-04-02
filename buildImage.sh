@@ -11,6 +11,6 @@ cd ../server
 ./gradlew build
 
 cd ../
-tar -xf server/build/distributions/swim-traffic-3.11.0-SNAPSHOT.tar -C dist/
+tar -xf server/build/distributions/swim-traffic-3.10.2.tar -C dist/
 
 sudo docker build ./ -f ./java.Dockerfile -t swimdatafabric/traffic:1.0

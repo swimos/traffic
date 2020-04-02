@@ -36,7 +36,7 @@ public class TrafficPlane extends AbstractPlane {
 
   public static void main(String[] args) {
     final Kernel kernel = ServerLoader.loadServer();
-    final Space space = (Space) kernel.getSpace("traffic");
+    final Space space = kernel.getSpace("traffic");
 
     kernel.start();
     System.out.println("Running TrafficPlane ...");

@@ -13,9 +13,6 @@ apply plugin: 'java-library'
 apply plugin: 'application'
 apply plugin: 'nebula.ospackage-application'
 
-apply plugin: 'idea'
-idea.module.outputDir file("out/production/classes")
-
 group = 'org.swimos'
 description = 'Real-time Traffic App'
 version = project.property('application.version')
@@ -53,6 +50,8 @@ afterEvaluate {
       doFirst {
         options.compilerArgs = [
           '--module-path', compileJava.classpath.asPath,
+          '--patch-module', "$moduleName="
+                  + files(sourceSets.main.resources.srcDirs).asPath,
         ]
       }
       options.compilerArgs += compilerArgs
@@ -70,6 +69,10 @@ afterEvaluate {
     dependentProjects.each { dependency ->
       compileModuleInfoJava.dependsOn ":${dependency.name}:compileModuleInfoJava"
     }
+  }
+
+  sourceSets {
+    main.output.resourcesDir = main.java.outputDir
   }
 
   compileJava {

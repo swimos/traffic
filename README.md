@@ -39,6 +39,9 @@ Run two Swim instances on your local machine to distribute the applications
 Web Agents between the two processes.
 
 ```sh
+# Build the UI
+server $ ./build.sh
+
 # Start the first fabric node in one terminal window:
 server $ ./gradlew run -Dswim.config.resource=server-a.recon
 

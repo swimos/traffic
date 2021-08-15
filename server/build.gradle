@@ -28,7 +28,6 @@ ext.moduleArgs = []
 
 repositories {
   mavenCentral()
-  jcenter()
 }
 
 dependencies {

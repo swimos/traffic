@@ -4,7 +4,7 @@ See [Traffic in action](http://www.swim.ai/showcase/traffic).
 
 ## Prerequisites
 
-* [Install JDK 8+](https://www.oracle.com/technetwork/java/javase/downloads/index.html).
+* [Install JDK 9+](https://www.oracle.com/technetwork/java/javase/downloads/index.html).
   * Ensure that your `JAVA_HOME` environment variable is pointed to your Java installation location.
   * Ensure that your `PATH` includes `$JAVA_HOME`.
 

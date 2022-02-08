@@ -67,7 +67,7 @@ export class VehicleFlowKpiViewController extends TrafficKpiViewController {
     const tween = Transition.duration<any>(1000);
 
     this.title!.text('Palo Alto - VEHICLE Flow');
-    this.subtitle!.text('@ RED LIGHTS');
+    this.subtitle!.text('@ GREEN LIGHTS');
 
     meter.value(meterValue, tween);
     empty.value(spaceValue, tween);

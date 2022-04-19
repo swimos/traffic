@@ -1,6 +1,6 @@
 # Traffic
 
-See [Traffic in action](http://www.swim.ai/showcase/traffic).
+See [Traffic in action](https://traffic.swim.ai).
 
 ## Prerequisites
 

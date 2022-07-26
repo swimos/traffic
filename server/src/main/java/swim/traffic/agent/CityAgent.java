@@ -1,4 +1,4 @@
-// Copyright 2015-2019 SWIM.AI inc.
+// Copyright 2015-2022 Swim.inc
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ public class CityAgent extends AbstractAgent {
       intersectionsLink = downlinkMap()
           .keyForm(Uri.form())
           .hostUri(TRAFFIC_HOST)
-          .nodeUri(Uri.from(nodeUri().path()))
+          .nodeUri(Uri.create(nodeUri().path()))
           .laneUri("intersections")
           .didUpdate(this::didUpdateRemoteIntersection)
           .open();

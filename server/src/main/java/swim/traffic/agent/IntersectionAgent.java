@@ -1,4 +1,4 @@
-// Copyright 2015-2019 SWIM.AI inc.
+// Copyright 2015-2022 Swim.inc
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -173,7 +173,7 @@ public class IntersectionAgent extends AbstractAgent {
     if (infoLink == null) {
       infoLink = downlink()
           .hostUri(TRAFFIC_HOST_URI)
-          .nodeUri(Uri.from(nodeUri().path()))
+          .nodeUri(Uri.create(nodeUri().path()))
           .laneUri("info")
           .onEvent(this::didSetRemoteInfo)
           .keepSynced(true)
@@ -196,7 +196,7 @@ public class IntersectionAgent extends AbstractAgent {
     if (schematicLink == null) {
       schematicLink = downlink()
           .hostUri(TRAFFIC_HOST_URI)
-          .nodeUri(Uri.from(nodeUri().path()))
+          .nodeUri(Uri.create(nodeUri().path()))
           .laneUri("schematic")
           .onEvent(this::didSetRemoteSchematic)
           .keepSynced(true)
@@ -221,7 +221,7 @@ public class IntersectionAgent extends AbstractAgent {
       lastScanTime = System.currentTimeMillis();
       scanLink = downlink()
           .hostUri(TRAFFIC_HOST)
-          .nodeUri(Uri.from(nodeUri().path()))
+          .nodeUri(Uri.create(nodeUri().path()))
           .laneUri("scan/state")
           .onEvent(this::didUpdateRemoteScan)
           .open()
@@ -327,7 +327,7 @@ public class IntersectionAgent extends AbstractAgent {
     if (latencyLink == null) {
       latencyLink = downlink()
           .hostUri(TRAFFIC_HOST_URI)
-          .nodeUri(Uri.from(nodeUri().path()))
+          .nodeUri(Uri.create(nodeUri().path()))
           .laneUri("latency")
           .onEvent(this::didSetRemoteLatency)
           .keepSynced(true)

@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// @ts-nocheck
+// Adding nocheck to guard for the "Properties Overriding Accessors" error sincei we use typescript 4.x and older versions of swim UI libraries
 import {AnyColor, Color} from "@swim/color";
 import {MemberAnimator} from "@swim/view";
 import {MapGraphicView} from "@swim/map";

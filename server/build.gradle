@@ -71,7 +71,7 @@ afterEvaluate {
   }
 
   sourceSets {
-    main.output.resourcesDir = main.java.outputDir
+    main.output.resourcesDir = main.java.classesDirectory
   }
 
   compileJava {
@@ -128,7 +128,7 @@ afterEvaluate {
         defaultJvmOpts += [
           '--module-path', 'APP_HOME_LIBS',
         ] + moduleArgs + [
-          '--module', "${moduleName}/${mainClassName}",
+          '--module', "${moduleName}/${mainClass}",
         ]
         classpath = files()
       }
@@ -150,7 +150,7 @@ afterEvaluate {
   }
 
   task packageDeb(type: Deb) {
-    maintainer = 'chris@swim.inc'
+    maintainer = 'developers@swimos.org'
 
     configurationFile("/etc/sysconfig/${project.name}")
     preInstall "addgroup --quiet --system ${project.name}"

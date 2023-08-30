@@ -1,18 +1,12 @@
-@kernel(class: 'swim.store.db.DbStoreKernel', optional: true)
-@kernel(class: 'swim.reflect.ReflectKernel', optional: true)
-
 traffic: @fabric {
   @plane(class: "swim.traffic.TrafficPlane")
-  #@node {
-  #  pattern: "/city/:id"
-  #  @agent(class: "swim.traffic.agent.CityAgent")
-  #}
-  #@node {
-  #  pattern: "/intersection/:country/:state/:city/:id"
-  #  @agent(class: "swim.traffic.agent.IntersectionAgent")
-  #}
-  @store {
-    path: "/tmp/swim-traffic/"
+  @node {
+    pattern: "/city/:id"
+    @agent(class: "swim.traffic.agent.CityAgent")
+  }
+  @node {
+    pattern: "/intersection/:country/:state/:city/:id"
+    @agent(class: "swim.traffic.agent.IntersectionAgent")
   }
 }
 

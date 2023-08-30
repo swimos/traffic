@@ -26,6 +26,14 @@ public class ResourceRouter {
                 return notFound();
             }
         }
+        if (path.toString().equals("login")) {
+            try {
+                final HttpBody<Object> body = HttpBody.fromFile(directory.toString() + "/login.html");
+                return HttpResponse.create(HttpStatus.OK).content(body);
+            } catch (IOException error) {
+                return notFound();
+            }
+        }
         if (path.toString().equals("/dist/main/swim-traffic.js")) {
             try {
                 final HttpBody<Object> body = HttpBody.fromFile(directory.toString() + "/dist/main/swim-traffic.js");

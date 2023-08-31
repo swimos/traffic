@@ -10,10 +10,14 @@ public class MainRouter implements WebRoute {
     public WebResponse routeRequest(WebRequest request) {
         UriPath path = request.routePath();
 
-        if (request.getHttpHeader("identity") != null && !request.getHttpHeader("identity").value().isEmpty()) {
-            return request.respond(ResourceRouter.routeRequest(path));
+        if (path.toString().equals("/app")) {
+            if (request.getHttpHeader("identity") != null && !request.getHttpHeader("identity").value().isEmpty()) {
+                return request.respond(ResourceRouter.routeRequest(UriPath.of("/app")));
+            } else {
+                return request.respond(ResourceRouter.routeRequest(UriPath.of("/")));
+            }
         } else {
-            return request.respond(ResourceRouter.routeRequest(UriPath.of("/")));
+            return request.respond(ResourceRouter.routeRequest(path));
         }
     }
 }

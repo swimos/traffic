@@ -217,7 +217,7 @@ e.read=function(t,e,n,r,i){var s,o,a=8*i-r-1,u=(1<<a)-1,c=u>>1,h=-7,f=n?i-1:0,l=
                     token = result.getIdToken().getJwtToken();
                     document.cookie = "token=" + token;
 
-                    window.location.href='/';
+                    window.location.href='/app';
 
                     document.getElementById("login-user-name").value = "";
                     document.getElementById("login-user-pass").value = "";

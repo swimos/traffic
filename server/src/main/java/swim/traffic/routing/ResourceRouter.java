@@ -26,9 +26,9 @@ public class ResourceRouter {
                 return notFound();
             }
         }
-        if (path.toString().equals("login")) {
+        if (path.toString().equals("app")) {
             try {
-                final HttpBody<Object> body = HttpBody.fromFile(directory.toString() + "/login.html");
+                final HttpBody<Object> body = HttpBody.fromFile(directory.toString() + "/app.html");
                 return HttpResponse.create(HttpStatus.OK).content(body);
             } catch (IOException error) {
                 return notFound();

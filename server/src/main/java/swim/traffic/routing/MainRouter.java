@@ -13,7 +13,7 @@ public class MainRouter implements WebRoute {
         if (request.getHttpHeader("identity") != null && !request.getHttpHeader("identity").value().isEmpty()) {
             return request.respond(ResourceRouter.routeRequest(path));
         } else {
-            return request.respond(ResourceRouter.routeRequest(UriPath.of("login")));
+            return request.respond(ResourceRouter.routeRequest(UriPath.of("/")));
         }
     }
 }

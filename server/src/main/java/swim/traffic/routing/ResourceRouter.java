@@ -26,7 +26,7 @@ public class ResourceRouter {
                 return notFound();
             }
         }
-        if (path.toString().equals("app")) {
+        if (path.toString().equals("/app")) {
             try {
                 final HttpBody<Object> body = HttpBody.fromFile(directory.toString() + "/app.html");
                 return HttpResponse.create(HttpStatus.OK).content(body);

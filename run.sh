@@ -1,3 +1,5 @@
+#!/bin/sh
+set -xe 
 cd ui
 npm install
 npm run compile && npm run bundle

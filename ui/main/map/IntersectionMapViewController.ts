@@ -147,7 +147,7 @@ export class IntersectionMapViewController extends MapGraphicViewController<Inte
   protected didSetPedCall(key: Value, value: Value): void {
     //console.log("intersection " + this._info.id + " didSetPedCall " + key + ": " + value);
     const view = this._view!;
-    this._pedCall = value.isDefined();
+    this._pedCall = value.numberValue(0) > 0;
     const marker = this.getChildView("marker") as MapCircleView | null;
     if (marker) {
       marker.fill.setState(this._pedCall ? view.pedestrianMarkerColor.value! : view.intersectionMarkerColor.value!,

@@ -14,6 +14,11 @@
 
 package swim.traffic.agent;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 import swim.api.SwimLane;
 import swim.api.SwimResident;
 import swim.api.agent.AbstractAgent;
@@ -23,6 +28,7 @@ import swim.api.lane.ValueLane;
 import swim.collections.HashTrieMap;
 import swim.collections.HashTrieSet;
 import swim.concurrent.TimerRef;
+import swim.structure.Item;
 import swim.structure.Record;
 import swim.structure.Value;
 import swim.traffic.model.IntersectionTensor;
@@ -36,6 +42,7 @@ import swim.uri.Uri;
 public class IntersectionAgent extends AbstractAgent {
   long lastScanTime;
   TimerRef sampleTimer;
+  TimerRef simTimer;
   IntersectionTensor intersectionTensor;
   HashTrieMap<Integer, Long> lastSignalPhaseEvent = HashTrieMap.empty();
   HashTrieMap<Integer, SignalPhaseModel> signalPhaseModels = HashTrieMap.empty();
@@ -44,9 +51,14 @@ public class IntersectionAgent extends AbstractAgent {
   EventDownlink<Value> scanLink;
   EventDownlink<Value> latencyLink;
 
+
   // 4 minute window; 1 second samples
   static final Long SAMPLE_WINDOW = 1000L;
   static final int SAMPLE_COUNT = 240; // MUST BE EVEN
+
+  static final Long SIM_START_DELAY = 5000L;
+  static final Long SIM_WINDOW_DEFAULT = 3000L;
+  int simCycles = 0;
 
   @SwimResident
   @SwimLane("intersection/info")
@@ -71,6 +83,8 @@ public class IntersectionAgent extends AbstractAgent {
   @SwimLane("phase/state")
   public MapLane<Integer, Integer> signalPhaseState = this.<Integer, Integer>mapLane()
       .didUpdate(this::didUpdateSignalPhase);
+
+  private final boolean simMode = System.getProperty("sim.mode", "false").equals("true");
 
   void didUpdateSignalPhase(Integer phaseId, Integer newPhase, Integer oldPhase) {
     updateSignalPhaseTensor(phaseId, newPhase, oldPhase, System.currentTimeMillis());
@@ -245,6 +259,80 @@ public class IntersectionAgent extends AbstractAgent {
     }
   }
 
+  private Map<Integer, Integer> phaseIds = new HashMap<>();
+  private Map<Integer, Boolean> detectorIds = new HashMap<>();
+
+  void simScan() {
+    final Value approaches = this.schematic.get();
+    final Iterator<Item> iterator = approaches.iterator();
+    boolean hasGreenOrYellow = false;
+    Set<Integer> phases = new HashSet<>();
+    Set<Integer> detectors = new HashSet<>();
+    while (iterator.hasNext()) {
+      final Item item = iterator.next();
+      if (item.tag() != null && item.tag().equals("approach")) {
+        int phaseId = item.get("phase").intValue(-1);
+        if (phaseId >= 0 && !phases.contains(phaseId)) {
+          phases.add(phaseId);
+          Integer prevState = this.phaseIds.getOrDefault(phaseId, 1);
+          final Integer newState = simPhase(hasGreenOrYellow, prevState);
+          if (newState == 3) {
+            hasGreenOrYellow = true;
+          }
+          if (prevState.intValue() != newState.intValue()) {
+            phaseIds.put(phaseId, newState);
+          }
+        }
+        int detectorId = item.get("detector").intValue(-1);
+        if (detectorId >= 0 && !detectors.contains(detectorId)) {
+          detectors.add(detectorId);
+          final Boolean newState = simDetector();
+          detectorIds.put(detectorId, newState);
+          this.vehicleDetectorState.put(detectorId, newState ? 1 : 0);
+        }
+      }
+    }
+
+    for (Integer phaseId: phaseIds.keySet()) {
+      this.signalPhaseState.put(phaseId, phaseIds.get(phaseId));
+    }
+    for (Integer detectorId: detectorIds.keySet()) {
+      this.vehicleDetectorState.put(detectorId, detectorIds.get(detectorId) ? 1 : 0);
+    }
+    simPedCall();
+
+    if (this.simCycles == 10) {
+      this.simCycles = 0;
+    } else {
+      this.simCycles += 1;
+    }
+    this.simTimer.reschedule(SIM_WINDOW_DEFAULT);
+  }
+
+  private void simPedCall() {
+    if (simCycles == 0) {
+      int pedCallState = Math.random() < 0.2 ? 1 : -1;
+      this.pedCall.set(pedCallState);
+    }
+  }
+
+  private Boolean simDetector() {
+    return Math.random() < 0.2;
+  }
+
+  private Integer simPhase(boolean hasGreenOrYellow, Integer prevValue) {
+    // 1 is Red, 2 is Yellow, 3 is Green
+    if (prevValue == 1 && this.simCycles == 0 && !hasGreenOrYellow) {
+      return 3;
+    } else if (prevValue == 2) {
+      return 1;
+    } else if (this.simCycles == 0) {
+      return 2;
+    } else {
+      return prevValue;
+    }
+  }
+
   void didUpdateRemoteScan(Value value) {
     if (value instanceof Record) {
       final Record state = (Record) value;
@@ -282,7 +370,8 @@ public class IntersectionAgent extends AbstractAgent {
 
   static final HashTrieSet<Uri> ENABLED = HashTrieSet.of(Uri.parse("/intersection/US/CA/PaloAlto/24"));
 
-  void didUpdateRemoteSignalPhase(int p, int st, long clk) {
+  void
+  didUpdateRemoteSignalPhase(int p, int st, long clk) {
     //System.out.println(nodeUri() + " didUpdateRemoteSignalPhase p: " + p + "; st: " + st);
     signalPhaseState.put(p, st);
 
@@ -351,8 +440,12 @@ public class IntersectionAgent extends AbstractAgent {
     System.out.println(nodeUri() + " didStart");
     linkInfo();
     linkSchematic();
-    linkScan();
-    linkLatency();
+    if (simMode) {
+      simTimer = setTimer(Math.round(Math.random() * SIM_START_DELAY), this::simScan);
+    } else {
+      linkScan();
+      linkLatency();
+    }
     initIntersectionTensor();
     sampleTimer = setTimer(SAMPLE_WINDOW, this::sampleIntersectionTensor);
   }

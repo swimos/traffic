@@ -293,13 +293,15 @@ public class IntersectionAgent extends AbstractAgent {
       }
     }
 
+    final long clk = System.currentTimeMillis();
     for (Integer phaseId: phaseIds.keySet()) {
-      this.signalPhaseState.put(phaseId, phaseIds.get(phaseId));
+      this.didUpdateRemoteSignalPhase(phaseId, phaseIds.get(phaseId), clk);
     }
     for (Integer detectorId: detectorIds.keySet()) {
       this.vehicleDetectorState.put(detectorId, detectorIds.get(detectorId) ? 1 : 0);
     }
     simPedCall();
+    simLatency();
 
     if (this.simCycles == 10) {
       this.simCycles = 0;
@@ -314,6 +316,12 @@ public class IntersectionAgent extends AbstractAgent {
       int pedCallState = Math.random() < 0.2 ? 1 : -1;
       this.pedCall.set(pedCallState);
     }
+  }
+
+  private void simLatency() {
+    long tsg = System.currentTimeMillis();
+    long tsm = tsg - (long) (50 + Math.random() * 500);
+    this.latency.set(Record.create(2).slot("tsg", tsg).slot("tm", tsm));
   }
 
   private Boolean simDetector() {
@@ -441,6 +449,7 @@ public class IntersectionAgent extends AbstractAgent {
     linkInfo();
     linkSchematic();
     if (simMode) {
+      this.mode.set(Record.create(1).slot("coord", "SYNC"));
       simTimer = setTimer(Math.round(Math.random() * SIM_START_DELAY), this::simScan);
     } else {
       linkScan();

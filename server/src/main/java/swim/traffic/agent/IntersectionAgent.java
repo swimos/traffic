@@ -266,8 +266,10 @@ public class IntersectionAgent extends AbstractAgent {
     final Value approaches = this.schematic.get();
     final Iterator<Item> iterator = approaches.iterator();
     boolean hasGreenOrYellow = false;
-    Set<Integer> phases = new HashSet<>();
-    Set<Integer> detectors = new HashSet<>();
+    final Set<Integer> phases = new HashSet<>();
+    final Set<Integer> detectors = new HashSet<>();
+    final Map<Integer, Integer> updatedPhaseIds = new HashMap<>();
+
     while (iterator.hasNext()) {
       final Item item = iterator.next();
       if (item.tag() != null && item.tag().equals("approach")) {
@@ -280,22 +282,23 @@ public class IntersectionAgent extends AbstractAgent {
             hasGreenOrYellow = true;
           }
           if (prevState.intValue() != newState.intValue()) {
-            phaseIds.put(phaseId, newState);
+            this.phaseIds.put(phaseId, newState);
+            updatedPhaseIds.put(phaseId, newState);
           }
         }
         int detectorId = item.get("detector").intValue(-1);
         if (detectorId >= 0 && !detectors.contains(detectorId)) {
           detectors.add(detectorId);
           final Boolean newState = simDetector();
-          detectorIds.put(detectorId, newState);
+          this.detectorIds.put(detectorId, newState);
           this.vehicleDetectorState.put(detectorId, newState ? 1 : 0);
         }
       }
     }
 
-    final long clk = System.currentTimeMillis();
-    for (Integer phaseId: phaseIds.keySet()) {
-      this.didUpdateRemoteSignalPhase(phaseId, phaseIds.get(phaseId), clk);
+    final long clk = System.currentTimeMillis() - 30;
+    for (Integer phaseId: updatedPhaseIds.keySet()) {
+      this.didUpdateRemoteSignalPhase(phaseId, updatedPhaseIds.get(phaseId), clk);
     }
     for (Integer detectorId: detectorIds.keySet()) {
       this.vehicleDetectorState.put(detectorId, detectorIds.get(detectorId) ? 1 : 0);

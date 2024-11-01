@@ -144,7 +144,7 @@ export class IntersectionMapViewController extends MapGraphicViewController<Inte
     } 
   }
 
-  protected didSetPedCall(key: Value, value: Value): void {
+  protected didSetPedCall(value: Value): void {
     //console.log("intersection " + this._info.id + " didSetPedCall " + key + ": " + value);
     const view = this._view!;
     this._pedCall = value.numberValue(0) > 0;
@@ -153,7 +153,6 @@ export class IntersectionMapViewController extends MapGraphicViewController<Inte
       marker.fill.setState(this._pedCall ? view.pedestrianMarkerColor.value! : view.intersectionMarkerColor.value!,
                            Transition.duration(500));
     }
-
     if (this._pedCall) {
       this.ripple(view.pedestrianMarkerColor.value!);
     } 

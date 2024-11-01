@@ -454,7 +454,8 @@ public class IntersectionAgent extends AbstractAgent {
     if (simMode) {
       this.mode.set(Record.create(1).slot("coord", "SYNC"));
       simTimer = setTimer(Math.round(Math.random() * SIM_START_DELAY), this::simScan);
-    } else {
+      this.pedCall.set(-1);
+    } else {  
       linkScan();
       linkLatency();
     }

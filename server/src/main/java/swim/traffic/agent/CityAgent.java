@@ -18,11 +18,15 @@ import swim.api.SwimLane;
 import swim.api.SwimResident;
 import swim.api.agent.AbstractAgent;
 import swim.api.downlink.MapDownlink;
+import swim.api.lane.CommandLane;
 import swim.api.lane.JoinValueLane;
 import swim.structure.Value;
 import swim.uri.Uri;
 
 public class CityAgent extends AbstractAgent {
+
+  private final boolean simMode = System.getProperty("sim.mode", "true").equals("true");
+
   MapDownlink<Uri, Value> intersectionsLink;
 
   @SwimLane("intersections")
@@ -58,17 +62,26 @@ public class CityAgent extends AbstractAgent {
     }
   }
 
+  @SwimLane("addInfo")
+  public CommandLane<Value> addInfo = this.<Value>commandLane().onCommand(value -> {
+    final Uri uri = Uri.parse(value.get("key").stringValue());
+    didUpdateRemoteIntersection(uri, value, value);
+  });
+
   public void didStart() {
     System.out.println(nodeUri() + " didStart");
-    linkIntersections();
+    if (!simMode) {
+      linkIntersections();
+    }
   }
 
   public void willStop() {
-    unlinkIntersections();
+    if (!simMode) {
+      unlinkIntersections();
+    }
   }
 
   static final Uri TRAFFIC_HOST = Uri.parse("warps://trafficware.swim.services?key=ab21cfe05ba-7d43-69b2-0aef-94d9d54b6f65");
   static final Uri INTERSECTION_INFO = Uri.parse("intersection/info");
-  static final Uri NEIGHBOR_ADD = Uri.parse("neighbor/add");
-  static final Uri NEIGHBOR_REMOVE = Uri.parse("neighbor/remove");
+
 }

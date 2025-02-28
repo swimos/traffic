@@ -23,11 +23,13 @@ import swim.api.SwimLane;
 import swim.api.SwimResident;
 import swim.api.agent.AbstractAgent;
 import swim.api.downlink.EventDownlink;
+import swim.api.lane.CommandLane;
 import swim.api.lane.MapLane;
 import swim.api.lane.ValueLane;
 import swim.collections.HashTrieMap;
 import swim.collections.HashTrieSet;
 import swim.concurrent.TimerRef;
+import swim.recon.Recon;
 import swim.structure.Item;
 import swim.structure.Record;
 import swim.structure.Value;
@@ -56,9 +58,11 @@ public class IntersectionAgent extends AbstractAgent {
   static final Long SAMPLE_WINDOW = 1000L;
   static final int SAMPLE_COUNT = 240; // MUST BE EVEN
 
+
   static final Long SIM_START_DELAY = 5000L;
   static final Long SIM_WINDOW_DEFAULT = 3000L;
   int simCycles = 0;
+  private final boolean simMode = System.getProperty("sim.mode", "true").equals("true");
 
   @SwimResident
   @SwimLane("intersection/info")
@@ -84,7 +88,6 @@ public class IntersectionAgent extends AbstractAgent {
   public MapLane<Integer, Integer> signalPhaseState = this.<Integer, Integer>mapLane()
       .didUpdate(this::didUpdateSignalPhase);
 
-  private final boolean simMode = System.getProperty("sim.mode", "false").equals("true");
 
   void didUpdateSignalPhase(Integer phaseId, Integer newPhase, Integer oldPhase) {
     updateSignalPhaseTensor(phaseId, newPhase, oldPhase, System.currentTimeMillis());
@@ -211,7 +214,7 @@ public class IntersectionAgent extends AbstractAgent {
       schematicLink = downlink()
           .hostUri(TRAFFIC_HOST_URI)
           .nodeUri(Uri.create(nodeUri().path()))
-          .laneUri("schematic")
+          .laneUri("intersection/schematic")
           .onEvent(this::didSetRemoteSchematic)
           .keepSynced(true)
           .open();
@@ -228,6 +231,7 @@ public class IntersectionAgent extends AbstractAgent {
   void didSetRemoteSchematic(Value newValue) {
     //System.out.println(nodeUri() + " didSetRemoteSchematic: " + Recon.toString(newValue));
     schematic.set(newValue);
+    System.out.println(nodeUri() + ":" + Recon.toString(newValue));
   }
 
   public void linkScan() {
@@ -446,16 +450,26 @@ public class IntersectionAgent extends AbstractAgent {
     latency.set(newValue);
   }
 
+  @SwimLane("addInfo")
+  public CommandLane<Value> addInfo = this.<Value>commandLane().onCommand(value -> {
+    info.set(value);
+  });
+
+  @SwimLane("addSchematic")
+  public CommandLane<Value> addSchematic = this.<Value>commandLane().onCommand(value -> {
+    schematic.set(value);
+  });
+
   @Override
   public void didStart() {
     System.out.println(nodeUri() + " didStart");
-    linkInfo();
-    linkSchematic();
     if (simMode) {
       this.mode.set(Record.create(1).slot("coord", "SYNC"));
       simTimer = setTimer(Math.round(Math.random() * SIM_START_DELAY), this::simScan);
       this.pedCall.set(-1);
-    } else {  
+    } else {
+      linkInfo();
+      linkSchematic();
       linkScan();
       linkLatency();
     }
@@ -476,6 +490,6 @@ public class IntersectionAgent extends AbstractAgent {
   }
 
   static final String TRAFFIC_HOST = System.getProperty("trafficware.api.host",
-      "warps://trafficware.swim.services?key=ab21cfe05ba-7d43-69b2-0aef-94d9d54b6f65");
+      "warps://traffic.swim.services");
   static final Uri TRAFFIC_HOST_URI = Uri.parse(TRAFFIC_HOST);
 }
